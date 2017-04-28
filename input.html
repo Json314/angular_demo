@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        .app {
+            margin-top: 30px;
+        }
+
+        .formError .control-label, .error {
+            color: #f00;
+        }
+
+        .formError .form-control {
+            border: 1px solid #f00 !important;
+        }
+
+        .error {
+            margin-top: 15px;
+            font-size: .8rem;
+        }
+    </style>
+    <!-- 最新版本的 Bootstrap 核心 CSS 文件 -->
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap.min.css"
+          integrity="sha384-BVYiiSIFeK1dGmJRAkycuHAHRg32OmUcww7on3RYdg4Va+PmSTsz/K68vbdEjh4u" crossorigin="anonymous">
+
+    <!-- 可选的 Bootstrap 主题文件（一般不用引入） -->
+    <link rel="stylesheet" href="https://cdn.bootcss.com/bootstrap/3.3.7/css/bootstrap-theme.min.css"
+          integrity="sha384-rHyoN1iRsVXV4nD0JutlnGaslCJuC7uwjduW9SVrLvRYooPp2bWYgmgJQIXwl/Sp" crossorigin="anonymous">
+
+    <!-- 最新的 Bootstrap 核心 JavaScript 文件 -->
+</head>
+<body ng-app="app">
+<div class="app">
+    <h3>表单数据绑定和验证，自定义表单验证</h3>
+    <div ng-controller="input">
+        <form class="form-horizontal" name="myForm">
+            <div class="form-group" ng-class="{formError: myForm.name.$dirty && myForm.name.$invalid}">
+                <label for="inputEmail3" class="col-sm-2 control-label">用户名</label>
+
+                <div class="col-sm-10">
+                    <input type="text" name="name" ng-model="formData.name" class="form-control" id="inputEmail3"
+                           ng-required="true" ng-minlength="4" ng-maxlength="10" placeholder="用户名">
+                </div>
+                <div class="col-sm-offset-2 col-sm-10 error" ng-show="myForm.name.$dirty && myForm.name.$invalid">
+                    请输入至少4位的用户名
+                </div>
+            </div>
+            <div class="form-group" ng-class="{formError: myForm.password.$dirty && myForm.password.$invalid}">
+                <label for="password" class="col-sm-2 control-label">密码</label>
+
+                <div class="col-sm-10">
+                    <input type="password" name="password" ng-model="formData.password" class="form-control"
+                           ng-required="true" ng-minlength="6" ng-maxlength="10" ng-pattern="/^\w{6,10}$/" id="password"
+                           placeholder="密码">
+                </div>
+                <div class="col-sm-offset-2 col-sm-10 error"
+                     ng-show="myForm.password.$dirty && myForm.password.$invalid">请输入6-10位的数字/字母/下划线密码
+                </div>
+            </div>
+            <div class="form-group"
+                 ng-class="{formError: myForm.password.$dirty && myForm.passwordConfirm.$dirty && formData.passwordConfirm !==formData.password}">
+                <label for="passwordConfirm" class="col-sm-2 control-label">确认密码</label>
+
+                <div class="col-sm-10">
+                    <input type="password" name="passwordConfirm" ng-model="formData.passwordConfirm" ng-required="true"
+                           ng-minlength="6" ng-maxlength="10" ng-pattern="/^\w{6,10}$/" class="form-control"
+                           id="passwordConfirm" ng-required="true" placeholder="Password">
+                </div>
+                <div class="col-sm-offset-2 col-sm-10 error"
+                     ng-show="myForm.password.$dirty && myForm.passwordConfirm.$dirty && formData.passwordConfirm !== formData.password">
+                    两次输入密码不一致
+                </div>
+            </div>
+            <div class="form-group">
+                <label for="select" class="col-sm-2 control-label">城市</label>
+                <div class="col-sm-2">
+                    <select class="form-control" name="province" id="select" ng-model="formData.province" ng-options="city.id as city.name for city in cities | province:0">
+                        <option value="">--请选择省--</option>
+                    </select>
+                </div>
+                <div class="col-sm-2">
+                    <select class="form-control" name="city" ng-show="formData.province" ng-model="formData.city" ng-options="city.id as city.name for city in cities | province : formData.province">
+                        <option value="">--请选择市--</option>
+                    </select>
+                </div>
+                <div class="col-sm-2">
+                    <select class="form-control" name="area" ng-required="true" ng-show="formData.city" ng-model="formData.area" ng-options="city.id as city.name for city in cities | province : formData.city">
+                        <option value="">--请选择县--</option>
+                    </select>
+                </div>
+            </div>
+            <!--自定义表单验证-->
+            <div class="form-group" ng-class="{formError: myForm.even.$dirty && myForm.even.$invalid}">
+                <label for="even" class="col-sm-2 control-label">偶数</label>
+
+                <div class="col-sm-10">
+                    <input type="password" name="even" even ng-model="formData.even" class="form-control"
+                           ng-required="true" id="even"
+                           placeholder="偶数">
+                </div>
+                <div class="col-sm-offset-2 col-sm-10 error"
+                     ng-show="myForm.even.$dirty && myForm.even.$invalid">请输入偶数
+                </div>
+            </div>
+            <div class="form-group">
+                <div class="col-sm-offset-2 col-sm-10">
+                    <button type="submit" class="btn btn-default"
+                            ng-disabled="myForm.$invalid || formData.passwordConfirm !== formData.password"
+                            ng-click="submit()">登录
+                    </button>
+                    <button type="reset" class="btn btn-danger" ng-click="reset()">重置</button>
+                </div>
+            </div>
+        </form>
+
+        <div class="row">
+            <div class="col-sm-2" style="text-align: right;">ngModel</div>
+            <custom class="col-sm-10" ng-model="formData.custom"></custom>
+            <div class="col-sm-2" style="text-align: right;">ngModel</div>
+            <custom class="col-sm-10" ng-model="formData.custom"></custom>
+        </div>
+
+    </div>
+</div>
+<script src="jquery.js"></script>
+<script src="https://cdn.bootcss.com/bootstrap/3.3.7/js/bootstrap.min.js"
+        integrity="sha384-Tc5IQib027qvyjSMfHjOMaLkfuWVxZxUPnCJA7l2mCWNIpG9mGCD8wGNIcPD7Txa"
+        crossorigin="anonymous"></script>
+<script src="./js/angular.js"></script>
+
+<script>
+    var app = angular.module('app', [], function ($provide) {
+    });
+    app.filter('province', function () {
+        return function (data, parent) {
+            var arr = [];
+            angular.forEach(data, function (obj) {
+                if(obj.parent === parent){
+                    arr.push(obj);
+                }
+            });
+            return arr;
+        }
+    });
+    app.controller('input', function ($scope) {
+        $scope.formData = {
+            name: '',
+            password: '',
+            passwordConfirm: '',
+            city: '',            //市
+            province: '',
+            area: '',
+            even: '',
+            custom: ''
+        };
+
+        //提交
+        $scope.submit = function () {
+            //     this.submit();
+            alert('inin');
+        }
+
+        //所有的省市区
+        $scope.cities = [
+            {
+                name: '山西',
+                id: 1,
+                parent: 0
+            },
+            {
+                name: '河南',
+                id: 2,
+                parent: 0
+            },
+            {
+                name: '太原',
+                id: 3,
+                parent: 1
+            },
+            {
+                name: '临汾',
+                id: 4,
+                parent: 1
+            },
+            {
+                name: '运城',
+                id: 5,
+                parent: 1
+            },
+            {
+                name: '郑州',
+                id: 6,
+                parent: 2
+            },
+            {
+                name: '许昌',
+                id: 7,
+                parent: 2
+            },
+            {
+                name: '开封',
+                id: 8,
+                parent: 2
+            },
+            {
+                name: '翼城县',
+                id: 9,
+                parent: 4
+            },
+            {
+                name: '蒲县',
+                id: 10,
+                parent: 4
+            },
+            {
+                name: '侯马',
+                id: 11,
+                parent: 4
+            },
+            {
+                name: '绛县',
+                id: 12,
+                parent: 5
+            },
+            {
+                name: '闻喜县',
+                id: 13,
+                parent: 5
+            },
+            {
+                name: '许昌县',
+                id: 14,
+                parent: 7
+            },
+            {
+                name: '禹州市',
+                id: 15,
+                parent: 7
+            }
+        ];
+
+        //重置表单
+        $scope.reset = function () {
+            $scope.myForm.$setPristine();
+        }
+    });
+
+    app.directive('even', function(){
+        return {
+            require: 'ngModel',
+            link: function(scope, tElement, tAttr, tController){
+                tController.$parsers.push(function(value){
+                    console.log(value);
+                    if(value % 2 === 0){
+                        tController.$setValidity('even', true);
+                    }else{
+                        tController.$setValidity('even', false);
+                    }
+                    return value + 'w';
+                });
+
+            }
+        }
+    });
+    app.directive('custom', function(){
+        return {
+            restrict: 'E',
+            template: '<div contenteditable="true"></div>',
+            replace: true,
+            require: 'ngModel',
+            link: function(scope, tElement, tAttr, tController){
+                tElement.on('keyup', function(){
+                    scope.$apply(function(){
+                        tController.$setViewValue(tElement.html());
+                        console.log(tController.$viewValue);
+                        console.log(tController.$modelValue);
+                    });
+                });
+                tController.$render = function(){
+                    tElement.html(tController.$modelValue);
+                }
+
+            }
+        }
+    });
+</script>
+</body>
+</html>

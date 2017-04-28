@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+    <style>
+        html{
+            font-size: 16px;
+        }
+        .teacher .name{
+            color: #f00;
+            font-size: 1.5rem;
+        }
+        .student .name{
+            color: #666;
+            font-size: 1.2rem;
+        }
+        .item span{
+            margin-right: 10px;
+        }
+    </style>
+</head>
+<body ng-app="app">
+    <h3>指令、view与model数据的双向绑定,自定义filter</h3>
+    <div ng-controller="myController">
+        <ol>
+            <li class="item" ng-repeat="student in datas" ng-class="{teacher: student.job === 'teacher',student:  student.job === 'student'}">
+                <h3>
+                    <span class="name" ng-bind="'姓名：' + student.name"></span>
+                    <span class="age" ng-bind="'年龄：' + student.age"></span>
+                    <span class="desc" ng-bind="'描述：' + student.desc"></span>
+                </h3>
+            </li>
+        </ol>
+        <my-directive></my-directive>
+    </div>
+    <script src="./jquery.js"></script>
+    <script src="./js/angular.js"></script>
+    <script>
+        angular.module('app',[])
+                .controller('myController', ['$scope', function($scope){
+                    $scope.datas = [
+                        {
+                            name: '张三',
+                            age: 23,
+                            desc: '我是张三',
+                            job: 'student'
+                        },
+                        {
+                            name: '李四',
+                            age: 24,
+                            desc: '我是李四',
+                            job: 'student'
+                        },
+                        {
+                            name: '王五',
+                            age: 25,
+                            desc: '我是王五',
+                            job: 'student'
+                        },
+                        {
+                            name: '王老师',
+                            age: 30,
+                            desc: '我是王老师',
+                            job: 'teacher'
+                        }
+                    ]
+                }])
+                .filter('filterName', function(){
+                    return function(data, job){
+                        var value = [];
+                        angular.forEach(data,function(o){
+                            if(o.job === job){
+                                value.push(o)
+                            }
+                        });
+                        return value;
+                    }
+                })
+                .directive('myDirective', function($filter){
+                    return {
+                        restrict: 'E',
+                        template: '<div><button type="button" class="add-teacher">添加老师</button><h3 ng-repeat="teacher in teachers | filterName:'+ "'teacher'" +'">{{teacher.name}}</h3></div>',
+                        replace: true,
+                        compile: function(tElement, tAttr, transclude){
+                            //此处的逻辑可以放到link函数中
+                            return function(scope){
+                                //此处开发时，可能是ajax异步请求，修改model的数据
+                                tElement.find('.add-teacher').on('click', function(){
+                                    scope.$apply(function(){
+                                        scope.teachers = scope.datas;
+                                        console.log(scope.teachers);
+                                        scope.datas.push({
+                                            name: '苏老师',
+                                            age: 24,
+                                            desc: '我是苏老师',
+                                            job: 'teacher'
+                                        });
+                                    });
+                                    console.log(scope.teachers);
+                                });
+                            }
+                        }
+                    }
+                })
+    </script>
+</body>
+</html>

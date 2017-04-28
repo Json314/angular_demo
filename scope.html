@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title></title>
+</head>
+<body ng-app="app">
+  <h3>指令的scope作用域详解</h3>
+  <div ng-view>
+    <div ng-controller="input">
+      <h3 ng-bind="list | json"></h3>
+      <element-tag value="{{list}}"></element-tag>
+      <hr/>
+      <h3 ng-bind="name"></h3>
+      <scope2 value="name"></scope2>
+      <hr/>
+      <h3 ng-bind="name"></h3>
+      <scope3 value="name"></scope3>
+    </div>
+  </div>
+<script src="jquery.js"></script>
+<script src="./js/angular.js"></script>
+
+<script>
+  var app = angular.module('app', [], function($provide){
+  });
+  app.controller('input', function($scope){
+    $scope.name = 'susu';
+    $scope.list = [
+      {
+        name: 'html'
+      },
+      {
+        name: 'css'
+      },
+      {
+        name: 'js'
+      }
+    ];;
+
+  });
+
+  app.directive('elementTag', function(){
+    return {
+      restrict: 'EAC',
+      scope: {
+        name: '@value'    //单向绑定
+      },
+      controller: function($scope){
+        console.log(typeof $scope.name);    //String
+        $scope.list = JSON.parse($scope.name)
+      },
+      template: '<div><h1 ng-repeat="item in list">{{item.name}}</h1></div>',
+      replace: true,
+      link: function(scope, iElement, iAttr){
+      }
+    }
+  });
+  app.directive('scope2', function(){
+    return {
+      restrict: 'EAC',
+      scope: {
+        name: '&value'    //将父作用域的属性封装成一个方法
+      },
+      controller: function($scope){
+        console.log($scope.name());
+        $scope.h1 = $scope.name();
+      },
+      template: '<div><ol><li ng-bind="h1"></li></ol></div>',
+      replace: true,
+      link: function(scope, iElement, iAttr){
+      }
+    }
+  });
+
+  app.directive('scope3', function(){
+    return {
+      restrict: 'EAC',
+      scope: {
+        name: '=value'    //双向绑定
+      },
+      controller: function($scope){
+        console.log($scope.name);
+        $scope.h1 = $scope.name;
+        setTimeout(function(){
+          $scope.$apply(function(){
+            $scope.h1 = '拉不拉卡';
+          });
+        },2000);
+      },
+      template: '<div><ol><li ng-bind="h1"></li></ol></div>',
+      replace: true,
+      link: function(scope, iElement, iAttr){
+      }
+    }
+  });
+</script>
+</body>
+</html>

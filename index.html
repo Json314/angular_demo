@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title></title>
+</head>
+<body ng-app="app">
+  <h3>angular的一些服务，以及脏检查</h3>
+  <div>
+    <div ng-controller="input">
+      <input type="text" ng-model="name"/>
+    </div>
+  </div>
+  <script src="./js/angular.js"></script>
+
+  <script>
+    var app = angular.module('app', [], function($provide){
+
+
+    });
+    app.provider('ReturnName', function(){
+      this.$get = function(){
+        return 'provider的数据';
+      }
+    });
+
+    app.factory('FactoryName', function(){
+      return [1,2,3];
+    });
+
+    app.service('ServiceName', function(){
+      return {name: 'ddd'}
+    });
+    app.controller('input', function($scope, ReturnName, FactoryName, ServiceName){
+      $scope.name = 1;
+      console.log(ReturnName);
+      console.log(FactoryName);
+      console.log(ServiceName);
+      setInterval(function(){
+        //触发脏检查
+        $scope.$apply(function(){
+          $scope.name ++;
+        });
+      },1000);
+    });
+
+  </script>
+</body>
+</html>

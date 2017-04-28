@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title></title>
+</head>
+<body ng-app="app">
+<div>
+  <h3>父子指令的数据传输</h3>
+  <div ng-controller="input">
+    <h3 ng-bind="name"></h3>
+    <element-tag></element-tag>
+  </div>
+</div>
+<script src="jquery.js"></script>
+<script src="./js/angular.js"></script>
+
+<script>
+  var app = angular.module('app', [], function($provide){
+  });
+  app.controller('input', function($scope){
+    $scope.name = 1;
+  });
+
+  app.directive('elementTag', function(){
+    return {
+      restrict: 'EAC',
+      controller: function($scope){
+        console.log($scope.name);
+        $scope.list = [
+          {
+            name: 'html'
+          },
+          {
+            name: 'css'
+          },
+          {
+            name: 'js'
+          }
+        ];
+      },
+      template: '<div><h1 ng-repeat="item in list">{{item.name}}</h1><button-directive></button-directive></div>',
+      replace: true,
+      link: function(scope, iElement, iAttr){
+        console.log('进入link函数');
+
+      }
+    }
+  });
+  app.directive('buttonDirective', function(){
+    return {
+      restrict: 'EAC',
+      require: '^elementTag',   //^表示允许向上查找
+      template: '<button type="button">点击</button>',
+      replace: true,
+      link: function(scope,iElement,iAttr,con){
+        iElement.on('click', function(){
+          console.log(con);
+          console.log(scope.list)
+          scope.$apply(function(){
+            scope.list.push({name: 'angular'});
+          });
+        });
+      }
+    }
+  });
+</script>
+</body>
+</html>

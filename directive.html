@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+  <meta charset="UTF-8">
+  <title></title>
+</head>
+<body ng-app="app">
+<div>
+  <h3>指令compile函数和link函数</h3>
+  <div ng-controller="input">
+    <h3 ng-bind="name"></h3>
+    <element-tag></element-tag>
+  </div>
+</div>
+<script src="jquery.js"></script>
+<script src="./js/angular.js"></script>
+
+<script>
+  var app = angular.module('app', [], function($provide){
+  });
+  app.controller('input', function($scope){
+    $scope.name = 1;
+  });
+
+  app.directive('elementTag', function(){
+    return {
+      restrict: 'EAC',
+      template: '<div><h1>hello</h1></div>',
+      replace: true,
+      compile: function(tElement, tAttrs, transiclude){
+        console.log('进入compile');
+        console.log(tElement);
+        console.log(tAttrs);
+        console.log('transiclude::: ' + transiclude );
+        //compile函数如果返回了postLink函数，link函数将不执行
+        return{
+          pre: function(){
+            console.log('进入pre');
+          },
+          post: function(scope){
+            console.log('进入post');
+            tElement.html('<button type="button" id="button">点击</button>');
+            console.log(scope.name);
+
+            tElement.find('#button').on('click', function(){
+              scope.$apply(function(){
+                scope.name ++ ;
+              });
+
+            });
+
+          }
+        }
+      },
+      link: function(scope,tEelement, tAttr, tController){
+        console.log('进入link函数');
+      }
+    }
+  });
+</script>
+</body>
+</html>
