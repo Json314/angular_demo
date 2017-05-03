@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html>
+<head lang="en">
+    <meta charset="UTF-8">
+    <title></title>
+</head>
+<body ng-app="app">
+   <h3>$http全局拦截</h3>
+   <div ng-controller="myController">
+       <div ng-bind="content"></div>
+   </div>
+   <script src="./jquery.js"></script>
+   <script src="./js/angular.js"></script>
+    <script>
+        angular.module('app',[])
+                .factory('myInterceptor', ['$log','$q', function($log, $q){
+//                    $log.debug('');
+                    console.log('进入拦截器');
+                    var myInterceptor = {
+                        request: function(config){
+//                            console.log(config)
+                            //此处可以判断token，session等，设置请求头headers
+                            //config.headers['x-session-token'] = SessionService.token;
+                            if(false){       //假设token不存在
+                                return $q.reject(config);
+                            }else{
+                                return $q.resolve(config);
+                            }
+                            return config;
+                        },
+                        response: function(response){
+//                            console.log(response)
+                            if(true){       //假设相应成功
+                                console.log('response success');
+                                return response;
+                            }else{
+                                return {}
+                            }
+
+                        },
+                        //响应失败、http请求超时{timeout：number}
+                        responseError: function(config){
+                            console.log('reponse error');
+                            return $q.reject(config);
+                        }
+
+                    };
+                    return myInterceptor;
+                }])
+                .config(['$httpProvider', function($httpProvider){
+                    $httpProvider.interceptors.push('myInterceptor');
+                }])
+                .controller('myController',['$scope', '$http','$filter', function($scope, $http, $filter){
+                    $scope.content = 'this is $http module!';
+                    //添加超时，IP后跟第二个参数{timeout:3000}
+                    $http.get('http://61.178.71.33:8082/v2/api/museum/exhibitionHall/list?token=token&type=EXHIBITION_HALL&sessionId=5').then(function(response){
+                        console.log(response);
+                        $scope.content = $filter('json')(response.data.result);
+                    });
+                }])
+    </script>
+</body>
+</html>
